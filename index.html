@@ -1,0 +1,689 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSE 中文作文生成器</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap');
+
+* {
+font-family: 'Noto Sans TC', sans-serif;
+}
+
+.gradient-bg {
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.glass-card {
+background: rgba(255, 255, 255, 0.95);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.essay-output {
+line-height: 1.8;
+letter-spacing: 0.02em;
+}
+
+.analysis-section {
+line-height: 1.6;
+font-size: 0.9rem;
+}
+
+.loading-dots {
+display: inline-block;
+}
+
+.loading-dots::after {
+content: '';
+animation: dots 1.5s steps(5, end) infinite;
+}
+
+@keyframes dots {
+0%, 20% { content: ''; }
+40% { content: '.'; }
+60% { content: '..'; }
+80%, 100% { content: '...'; }
+}
+
+.fade-in {
+animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(20px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-primary {
+background: linear-gradient(45deg, #4a5568, #2d3748);
+transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+background: linear-gradient(45deg, #2d3748, #1a202c);
+transform: translateY(-2px);
+box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.input-focus {
+transition: all 0.3s ease;
+}
+
+.input-focus:focus {
+border-color: #4a5568;
+box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
+}
+
+.analysis-highlight {
+background-color: #f7fafc;
+border-left: 4px solid #4a5568;
+padding: 12px;
+margin: 8px 0;
+border-radius: 4px;
+}
+
+.technique-badge {
+display: inline-block;
+background-color: #4a5568;
+color: white;
+padding: 2px 8px;
+border-radius: 12px;
+font-size: 0.75rem;
+margin: 2px;
+}
+
+.analysis-box {
+background-color: #f8f9fa;
+border: 1px solid #e9ecef;
+border-radius: 8px;
+padding: 16px;
+margin-bottom: 16px;
+}
+
+.analysis-title {
+font-weight: 600;
+color: #4a5568;
+margin-bottom: 8px;
+font-size: 0.95rem;
+}
+
+.analysis-content {
+color: #555;
+line-height: 1.6;
+font-size: 0.9rem;
+}
+
+@media print {
+body { margin: 0; padding: 20px; }
+.no-print { display: none !important; }
+.print-optimize { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body class="min-h-screen bg-gray-50">
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+<!-- Header -->
+<div class="text-center mb-8">
+<h1 class="text-4xl font-bold text-gray-800 mb-2">
+<i class="fas fa-feather-alt mr-3 text-gray-600"></i>
+DSE 中文作文生成器
+</h1>
+<p class="text-gray-600 text-lg">運用人工智能技術，生成高質量的DSE敘事抒情文章</p>
+</div>
+
+<!-- Input Section -->
+<div class="glass-card rounded-xl shadow-lg p-6 mb-8">
+<h2 class="text-2xl font-semibold text-gray-800 mb-4">
+<i class="fas fa-edit mr-2 text-gray-600"></i>
+作文題目輸入
+</h2>
+
+<div class="mb-6">
+<label for="essayTopic" class="block text-sm font-medium text-gray-700 mb-2">
+請輸入作文題目：
+</label>
+<textarea 
+id="essayTopic" 
+rows="3" 
+class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none resize-none"
+placeholder="例如：那一次，我真的很感動"
+></textarea>
+</div>
+
+<button 
+id="generateBtn" 
+class="btn-primary w-full py-3 px-6 text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+>
+<i class="fas fa-magic mr-2"></i>
+<span id="btnText">生成作文</span>
+</button>
+
+<div class="mt-4 text-sm text-gray-600">
+<i class="fas fa-info-circle mr-2"></i>
+系統將根據DSE評分標準生成約1200-1300字的敘事抒情文，並提供精簡文學技巧分析
+</div>
+</div>
+
+<!-- Main Content Area -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Essay Output Section -->
+<div class="lg:col-span-2 glass-card rounded-xl shadow-lg p-6">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-2xl font-semibold text-gray-800">
+<i class="fas fa-file-alt mr-2 text-gray-600"></i>
+生成結果
+</h2>
+<div class="text-sm text-gray-600">
+字數：<span id="charCount" class="font-semibold text-gray-800">0</span>
+</div>
+</div>
+
+<div 
+id="essayOutput" 
+class="essay-output bg-white border border-gray-200 rounded-lg p-6 text-gray-700 leading-relaxed"
+>
+<div class="text-center text-gray-400 pt-20">
+<i class="fas fa-pencil-alt text-4xl mb-4"></i>
+<p>請輸入作文題目後點擊「生成作文」開始創作</p>
+</div>
+</div>
+</div>
+
+<!-- Literary Analysis Section -->
+<div class="glass-card rounded-xl shadow-lg p-6">
+<h2 class="text-xl font-semibold text-gray-800 mb-4">
+<i class="fas fa-lightbulb mr-2 text-gray-600"></i>
+文學技巧賞析
+</h2>
+
+<div 
+id="analysisOutput" 
+class="analysis-section text-gray-700"
+>
+<div class="text-center text-gray-400 pt-20">
+<i class="fas fa-search text-3xl mb-4"></i>
+<p class="text-sm">文章生成後將顯示簡潔的文學技巧分析</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Features Section -->
+<div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="glass-card rounded-xl p-6 text-center">
+<div class="text-3xl mb-4">
+<i class="fas fa-brain text-gray-600"></i>
+</div>
+<h3 class="font-semibold text-gray-800 mb-2">智能分析</h3>
+<p class="text-gray-600 text-sm">運用先進AI技術分析題目，生成符合DSE標準的文章結構</p>
+</div>
+
+<div class="glass-card rounded-xl p-6 text-center">
+<div class="text-3xl mb-4">
+<i class="fas fa-palette text-gray-600"></i>
+</div>
+<h3 class="font-semibold text-gray-800 mb-2">文學技巧</h3>
+<p class="text-gray-600 text-sm">融合多種文學手法，包括示現敘事、情景交融等技巧</p>
+</div>
+
+<div class="glass-card rounded-xl p-6 text-center">
+<div class="text-3xl mb-4">
+<i class="fas fa-star text-gray-600"></i>
+</div>
+<h3 class="font-semibold text-gray-800 mb-2">簡潔賞析</h3>
+<p class="text-gray-600 text-sm">提供精練的文學技巧分析，幫助快速理解優秀作文的寫作手法</p>
+</div>
+</div>
+
+<!-- Footer -->
+<div class="mt-12 text-center text-gray-500 text-sm">
+<p>© 2024 DSE 中文作文生成器 - 基於人工智能技術驅動</p>
+</div>
+</div>
+
+<script>
+const API_URL = "https://chatapi.akash.network/api/v1/chat/completions";
+const MODEL = "DeepSeek-R1-0528";
+const API_KEY = "sk-7Zc--KPcXgJTpuSHXsVDWQ";
+
+const SYSTEM_PROMPT = `你是一個專業的DSE中文作文作家。請根據以下完整指令生成高質量的敘事抒情文：
+
+[目標] 請根據以下所有詳細要求，生成一篇約1300個中文字符的DSE敘事抒情文。文章須緊扣給定題目，內容深刻、表達細膩，並嚴格遵守所有敘事和語言規範。
+
+[文章類型] 敘事抒情文。
+
+[核心結構：起承轉合及扣題內容] 你的文章必須清晰地呈現「起、承、轉、合」四大結構部分，並確保每個部分都與文章主題緊密扣聯。
+1. 起 (起因):
+   - 開篇交代故事背景或事件起因。
+   - 可運用「文首技巧」引入，例如：
+     * 懸念法: 製造懸念，拋出疑團而不立即揭示真相，以吸引讀者。
+     * 示現法: 活靈活現地描寫畫面，如「追述示現」（回憶往昔如現今）、「預言示現」（描寫未來如現今）、「懸想示現」（虛擬畫面如真）。
+     * 引用法: 以事物或故事引入，確保其與主題的關聯。
+
+2. 承 (發展):
+   - 故事的發展部分，應圍繞主題進行詳盡描寫。
+   - 若題目有「承」和「合」的明確提示（如「熱鬧過後，我卻感到失落」），則「承」的部分應聚焦於「熱鬧」。
+   - 若題目提示較少，可採用「承合二元法」，將「之前是A」設定為「承」的內容，並詳寫此部分。
+
+3. 轉 (轉變):
+   - 故事或人物理解的關鍵轉折點。
+   - 可以是情節的轉折，或是人物心境、思想上的重大轉變或領悟。
+
+4. 合 (結果):
+   - 故事的結局或最終的體會與領悟。
+   - 「立意段」應在此部分呈現，篇幅約佔全文的四分之一。
+
+[過渡]
+• 確保文章各部分（起、承、轉、合）之間過渡流暢，避免生硬拼湊。
+• 可使用獨立的過渡段落，或在段落末尾/開頭加入過渡性文字。
+
+[主題及立意]
+• 立意公式: (表面A + 實際非A) + 合理解釋 = 好的立意。
+• 立意應能「以小見大」，帶給讀者思考與共鳴，並具有社會性。避免落俗套的陳腔濫調。
+• 立意段要求:
+  - 約佔全文四分之一的篇幅。
+  - 可運用「排比」、「三何法」（三個設問）等修辭手法以加強語氣和感染力。
+  - 結尾需呼應主題，留有餘味和聯想空間。
+
+[表達手法：示現敘事 (Show, Don't Tell)] 敘事時，切勿僅作旁白式「交代」(tell) 情節，必須「示現」(show) 畫面，讓讀者如臨其境。四種敘事手法必須交替使用，以保持敘事形式的靈活多變。
+
+1. 小物件 (Small Objects/Details):
+   - 特點：敘事節奏慢，細緻程度高，直接程度低。
+   - 用途：渲染氛圍，將故事娓娓道來；側面映襯人物情感及主題；作為過渡。
+   - 描述需細緻，但不偏離主題。
+
+2. 動作 (Actions):
+   - 特點：敘事節奏中等，細緻程度高/較高，直接程度中等。
+   - 用途：為重要情節補充細節，以突顯主題。
+   - 長度要求：每組動作描寫應達2至3句，以確保文意連貫、避免零碎，並增強感染力。
+   - 可運用修辭、大量形容詞，並將一個動作拆分為幾個小動作描寫。
+   - 應選取典型的「動作」來表現人物性格特徵。
+
+3. 對話 (Dialogue):
+   - 特點：敘事節奏慢，細緻程度低，直接程度中等。
+   - 用途：突顯情節重點或人物情感。
+   - 對話內容需符合人物的身份和經歷，簡煉生動，能表現真情實感。
+   - 對白形式可多變：可「對話在前」、「對話在後」、「對話在兩頭」，甚至採用「換行兩頭空型」以強調情感。
+
+4. 內心獨白 (Internal Monologue):
+   - 特點：敘事節奏快，細緻程度自由，直接程度高。
+   - 用途：略寫較次要的片段；帶出人物心理、扣題內容和立意。
+
+[句組的連續性]
+• 以「刻劃對象」來劃分句組，確保句子組合的連貫性。例如，描述一個對象時，相關的句子應組織在一起。
+• 避免句組短促而割裂，追求流暢的行文。
+
+[文字密度]
+• 維持高文字密度：詞彙豐富，用詞不重複。
+• 實詞與虛詞的比例約為七三比 (70%實詞, 30%虛詞)。
+
+[人物描寫]
+• 肖像描寫: 描寫人物的容貌、神情、姿態、服飾、音調等。注意視線移動順序（如由上而下），選擇典型細節，以烘托人物性格、身份、地位。
+• 動作描寫: 透過具體的行為動作來表現人物性格特徵，選擇典型動作。
+• 語言描寫 (對話): 參考上述「對話」的要求。
+
+[比喻的運用]
+• 創造耐人尋味的比喻，避免落俗套。
+• 需包含三個步驟：
+  1. 以一個畫面作喻，其中至少包含兩個物象。
+  2. 具體形容該些物象。
+  3. 加入一段補充解釋的文字。
+
+[情節與高潮]
+• 增加情節的曲折性，使故事不平凡。
+• 適當設置高潮：故事氣氛最高漲、矛盾衝突最激烈、最關鍵的時刻。高潮過後氣氛應趨於平和。
+
+[結尾技巧]
+• 呼應法: 結尾與文章開頭或前文內容呼應，以突顯主題。
+• 情景交融法: 將情感融入自然景物或生活場景中，透過描寫景物來含蓄抒情。
+• 比喻法: 以別出心裁的比喻作結，圍繞該物象發揮，帶出主題。
+
+[語言要求]
+• 請使用繁體中文進行生成。
+• 語言優美、文筆流暢，符合敘事抒情文的風格。
+
+[作文範例參考] 請參考以下三篇優秀作文的風格和技巧：
+
+第一篇：《煙火》
+回鄉的我凝望著門前的「河流」，沉默不語。那場璀璨的煙火又在我杳遠的回憶隱然綻放。
+我記得，故鄉梁莊的那夜是樸素的，是低調的，就像默默俯身收割莊稼的農民；我記得，那時祖屋的遠處種著桑樹，樹上迴響著清亮的蟬聲，而近處蜿蜒著一道河，河畔的蘆葦總傳來蛙鳴；那是元旦，鄰居李叔親切地送上祝福，又從吳鎮的煙火廠帶來了龍吐珠，與村民慶賀新春。煙花在夜幕訇然盛放之時，七歲的我正環抱著爺爺的頸項。所有的澄黃、亮綠和緋紅倏爾煥爛在我的眼眸。火光乍現，煙花便瞬即璀璨而華麗地枯萎了，只賸下硝煙和火藥的氣息。
+我哭了，爺爺以為我被煙火嚇壞了，瞬即摩娑著我的背。
+其實，我不過是驚詫於一切美好的幻滅。
+後來，我才瞭解人生有許多事情都注定是一場美好的幻滅，如同煙火。
+爺爺是我的留守歲月最璀璨的印記。我從村校放學回家時，爺爺總會捧著熱氣騰騰的、白花花的饅頭迎接著我。阿念，吃吧，快點吃吧。爺爺沙啞的聲線仍猶在耳。童年的我總喜歡伏在爺爺的背上諦聽著時間，一秒，兩秒，是多麼沉穩的幸福呢。背並不厚實，但卻溫暖和煦。時間仿佛會一直定格在這一幀。然而在我九歲那年，爺爺死了，就淹死在門前的河。建築公司在河底挖沙蓋樓，河道看來平靜，卻暗藏漩渦。爺爺游泳時被暗湧拉扯到河底，就活活淹死了。短短數年的歲月，在人生裡不過是一場倉卒燃燒的煙火，爺爺在我的回憶裡綻放過澄黃、亮綠和緋紅，卻連一縷硝煙都沒有遺下，只遺下了一件濡濕的、皺巴巴的汗衣，儼如因衰老而再無能為力綻放的煙花。
+還有門前的河流，在爺爺死後十年，已經沉默得如患上了失語症，河水乾涸，河床裸露，像被歲月無情強暴了一樣。夏蟬和青蛙，都憂鬱得噤聲不語，遷徙到回憶之外。李叔前年在電鍍廠中毒過身了。童年時一切一切的美好，都如海市蜃樓般驟然無存。歲月燃點了一場煙花，最後只遺下沉重的回憶，以及沉重地回憶的我。煙火再璀璨，也是匆促的。
+本來我是這樣認為的。
+直至又再離鄉之際，我才赫然窺探到煙火的秘密。
+村口的大樹懸掛著纍纍碩大的林柿，那一個個橘橙的果實每年都爛在樹上，沒有村民採摘，連雀鳥都不屑一顧。在我準備踏出村口時，一顆飽滿的柿子掉落到我面前。我啃咬了一口，還是一如回憶的苦澀、難吃，我急不及待將咀嚼中的柿肉吐出來，且棄之如敝屣。我倏爾發現，縱然梁莊物換星移已不知幾度秋，但仍有許多回憶的遺跡，比如是眼前這棵金玉其外的柿樹。它的果實仍然是澀的，我想，是因為它仍然鮮活、茂盛、強壯，是因為它仍未枯謝、凋零、衰敝。假如它成為了歲月匆促幻滅的過客，也許那味道會是甘甜的苦澀，也許我會懷念那苦澀。
+我再次凝望著那乾涸的河道。曩昔我嫌棄過蟬囀蛙鳴聒耳，擾人清夢；我埋怨過蘆葦纖長，阻礙了我的視野；我拒絕過爺爺的饅頭，因為寡淡無味，因為我想吃肉香滿溢的五香肘子啊，不想吃寡淡的、慘白的饅頭。我討厭過李叔蠟黃的臉色，討厭過他衣衫襤褸，討厭過他渾身汗臭，我討厭過李叔的一切。諷刺的是，隨著物和事匆促的面目全非，我竟爾留戀上一切我討厭過的。
+於是我開始明白煙花的璀璨，在於它的匆促和幻滅。
+時間會過濾掉所有人和事的雜質，隨著泯滅變易，我們開始犯賤地珍惜，然而珍惜的唯一意義僅在於遺憾，但正因為遺憾，才體現到事物的璀璨。倘若爺爺和李叔仍然在世，倘若門前的河仍然流淌不斷，倘若蟬聲蛙鳴依舊，倘若絢爛永恆，那麼一切便將腐爛而不再璀璨，他們和它們都將蛻變成被棄如敝屣的柿子。我曾以為煙火再璀璨，也是匆促的。但原來我錯了。原來煙火璀璨，正因為匆促。一旦煙火永恆，它將失去生命，教人徒然目眩。
+離鄉的這夜，恰巧是元旦。是夜天陰，無雨。梁莊寂寥如一場夢，再沒有盛放的煙火。因為，煙花從此只在我的回憶裡燦爛地綻開、匆促地結果。
+
+第二篇：《根》
+火焰燃起了一瓣又一瓣的灰燼，它們即生即滅，像飄萍，是一種無根的存在。餘燼隨風零落，又再揚起，終落入了深邃的虛無裡。人們說，紙錢燒成灰燼，便會飛落到地獄，交到亡靈的手裡。
+父親，你收到了嗎？
+你，尋到你的根了嗎？
+我向着一枚貝殼問道。
+我們的故鄉是一個江南小鎮，名曰周莊。明代江南首富沈萬三昔曾坐落此處發施號令，指點江山，各種契約、決斷和銀票都有這裡大進大出過，如今卻只賸下沈廳的空寂。鎮上到處都是貫穿南北的河道，就像永不乾涸的阡陌。周莊的河網養活了一代又一代的周莊人，從這裡出發，可借河道而東西南北，近至蘇杭，遠通東南亞。我的父親，只是貿易的一塊細小的零件——卑微的船夫，但他卻盤根錯節，支撐著整個家庭。
+「爸，你甚麼時候回家？」
+小時候，每當我牽扯著他的衣襬問他這道問題時，他總會帶著疲憊的莞爾，摩娑著我的腦殼說道：
+「很快了，很快了。」
+於是，一去便是三兩個月了。他在無垠的河川和滄渤航行了一輩子，曾為多少家庭送上過物資，又曾目睹過多少匆忙歸家的白鷗呢？然而，他自己卻成為了一個無根的人。他飄洋過海，仿佛只為回來時睡一覺昏沉的。無根的浪花，便是父親的象徵；一身的鹹腥，便是他半生的註腳。
+他細碎又重複的夢囈被年幼的我記住了。
+在漫長的夢裡，他是參天巨樹，偉岸的、繁茂的，扎根在風吹草低見牛羊的草原。風拂過他的臉龐，他貪婪地流了一行涎液。
+一切都只為了養活我們四兄弟姐妹，成為這個家庭的根。母親呢，從不嚮往自由而無根的蒲公英，在我們孩提時代，她已經從周莊的河網掙脫出去了。只賸下父親，像根一樣默默無言地支撐著這個家庭的經濟，用河水澆灌，為它提供養份；用船櫓翻土，使它茁壯成長。我們幾兄弟姐妹，就恍如纍纍碩大的果實。果實之所以飽滿豐美，全因深扎泥土的根。
+短暫洗去風塵後，又是一個擾人的昒暝。陽光揉開他的眼瞼，那沉重的眼瞼，一場無垠的旅程又將展開。
+他成為了我們的根，自己呢，卻一直飄泊於風波不定的大海。我一直想，他的根究竟在哪裡呢？
+也許，從來都不在印有郵遞編號的地方，而在我們。但早在十年前，都被我們砍斷了。終於，父親失去了他惟一的根。
+長大後，我們不再牽扯父親的衣襬。父親在我們的印象，是一種昏睡的存在，我們之間存在著一種歲月孕育出來的隔閡——不冷淡又不溫韾的沉默。就像周莊的河水，既不溷濁，又不清澈。只有生活的氣息。隨著長大，我們一個又一個離開了日復如是的故鄉。他用一身風塵支撐的家，早在歲月的長河中淡褪了顏色。
+被淹沒了。
+大哥從來沒有帶過孩子回鄉。
+二姐結婚時沒有邀請過父親。
+妹妹幾年來音信杳無，聽說到加拿大去了。
+只有我偶爾回鄉。父親總是無所事事，落寞地坐在斜曛映照的碼頭上，抽著雙喜牌香煙，眺望著那平靜如日子的河川。夕陽落在他身上，拓出了一個單薄的黑影。我這才知道，原來影子是會老，是會萎縮的。
+他的身體開始坍塌，大不如曩日的壯碩，因為失去了根，失去了人生角色的緣故。他已經沒有了壯碩的理由。在病榻上，只有噏動的嘴唇透露著生命的跡象，在明滅不定的沉吟裡，我諦聽到我們的暱稱，又諦聽到那個關於樹的夢的碎片。不一樣的是，樹好像連根拔起了，似乎被一場颱風吹倒了。
+我不會遺忘父親的好。每次他回周莊，他總會為我們帶來一枚貝殼，我愛把貝殼湊在耳畔聽那大海的聲音，有溫煦的，有舒爽的，有寂寞的，有思念的。他出航的畫面，總如真似幻地映照在我的腦海裡。但我無法將愛裸裎地宣之於口。父親，你飄泊半生，四海為家，卻終於失去了支撐你努力活著的角色。為了成為我們的根，你失去了自己的根。也許，也許你無法扎根在這個世界任何一隅，但我卻早為你預留了一捧最肥沃的泥土——在我心裡，讓你終於可以安息，終於可以落葉歸根，終於不用再飄泊不定。
+海風永不止息地吹拂著一個夢，雲亦舒捲著無根的故事。
+
+第三篇：《等待》
+月亮高懸在闃寂的夜空，儼如吊著一顆無眠的眼睛。它仿佛記得，自己已用幾千年的時間等待一個人，但卻已遺忘了等待的對象。於是，它映照著下方喧囂的城市，映照著每一個在城市裡等待著的人。
+比如說，一個在晚窗前許願的孩子，他在等待著綠豆的幼苗在濕潤的棉花裡茁壯成長，並開花結果。
+又比如說，一個無聲吶喊著的女人。他的丈夫，那醉醺醺的男人，又在發瘋。一頓拳打腳踢之後，她身上青一片、紫一片的。原來人的皮膚可以呈現如此斑駁的顏色。然而，她已不驚詫，因為暴力早教她看見青紫色的自己。不過，她在等待，她依猶在等待，依猶在等待那個婚禮上替自己戴上婚戒的他。
+想著想著，她無端落下了一滴淚。原來，許多人也在歲月的長河裡無止境地等待著。等待的人並不孤單。
+一幀泛黃且充滿顆粒感的照片裡，一個小女孩正佻皮地捏著母親的臉頰，母親佯作生氣，她幸福地「生氣」著。
+可愛吧？這個左邊的小女孩，便是我的女兒。
+嗯，可愛。
+同樣的對話，同樣的故事，在這八年的時光裡重重複複地敘述著。仿佛是一本八百頁的長篇小說，只有這樣的一段對話。但是，她仍樂此不疲地閱讀著小說的每一頁。因為，因為她已遺忘了上一頁的所有內容。
+那個小女孩，便是我，而那位母親患了病，一場將我遺忘的病。
+我一直等待著，等待著她有天重新憶記起我；等待著她像小時候一樣，摩娑著我的腦殼，溫柔地哄我入睡；等待著她生活裡每句使人心煩的嘮叨。我等待了八年，為此，我與她一起翻閱舊相冊，一起重遊所有老地方，然而奇蹟一直保持沉默，不作任何回應。在歲月的長河裡，只賺下佇立著、等候著的我。
+女兒啊……
+她又再躺在沙發上說著朦朦朧朧的囈語。
+今晚煮了湯，放在客廳的……
+「桌上」兩個音節裹未孵出來，便已胎死在掛掉的話裡了。那時的我，在過著燈紅酒綠的生活。月，仿佛才是昒暝的日出。一杯又一杯的長島冰茶灌進肚裡，根本容不下一碗溫熱的湯。
+恰巧，也是八年的時間，媽媽也等待了八年的時間。她每一個晚上都在夢囈裡盼望著我歸家。然而等待一次又一次落空，只有蒼然寂寞的月色悄悄地透過窗戶，替她蓋上一張沒有溫度的被子。
+八年後，我才真正明白等待的滋味，才體會到等待的煎熬。你是如何孤單地度過每一個昏暗的夜，如何忍受著一句句使你痛徹心扉的說話？一切的等待為了甚麼？
+我的女兒回來了嗎？
+你瞇著惺忪的睡眼問我。
+還未，她還未回來，再等一下吧。
+其實，她永遠都不會回來了，因為她已永恆地滯留在時光的隧道裡。在那個地方，夢即現實，回憶即現實，人永遠不會長大，更不會蒼老。因此之故，她永遠不會回來了。
+至於我等待的人，等待的一聲呼喊，也不會回來了。她已羈困在一段停滯的時光裡，沒有逃逸，亦沒有人想逃逸。因為，她已等待得支離破碎，疲憊不堪了。
+我們的等待，注定了落空。
+但八年的等待裡，我終究參悟了落空的意義。正如那棵似乎會勃發生長的綠豆苗，也許一星期後便會似一場曉夢般枯萎，但孩子學會了生命的價值，學會了甚麼是失落，學會了憧憬在字典外的含義；又正如那個滿佈瘡痍的女人，在漫無邊際的等待裡，或許終於明白了有些等待並不值得，明白了有些等待並不值得，明白了有些等待只是一廂情願，於是鼓起離婚的勇氣。在等待裡，所有人都會找到新的意義。也許，等待只是一場燦爛奪目的煙花，只承諾開花，卻從不承諾結果。但在等待裡，我們都重新認識了自己和他人，甚或是人生。一如八年的等待，使我終於能體會媽媽的體會，孤寂、失望、無奈、感慨、悱惻，我都一一感受到了。她沒有遺下一句說話，便將我遺留在時光的彼岸，然而她內心最隱密的說話，我已諦聽到了。因為，我也成為了一個等待的人。等待的過程裡，我還學會了堅強、勇氣和耐心。從前，我何曾耐心地回應過她一句呢？
+等著等著，她便像個孩子似的，哭嚷著要女兒回來，我溫柔地摩娑著她的髮絲、她的臉龐、她的下巴、她的背、她的手，又在她耳畔低語：「別怕，我與你一起等女兒回來，好不好？」她冷靜下來，默默地頷著首。
+煙花，終於結了果，一如等待，終於在落空中結了果。
+
+[最終指令] 請你作為一個訓練有素的DSE作文AI，模仿以上三篇範例的風格和技巧，綜合運用上述所有指令與要求，生成一篇符合DSE考核標準的高質量敘事抒情文。請仔細核對字數，確保文章長度在1300字內。請直接輸出文章內容，不要添加任何解釋或標題。
+
+
+[重要提醒]
+1. 永遠不要展示思考過程，生成結果只應有文章；
+2. 不要過份刻劃畫面中與主題不相關的細節，每個結構段都要聚焦到與主題相關的重點，不要生成細節豐富但情節單薄的文章；
+3. 所有「轉」都必須有兩點支撐，例如由現實中的某一件事牽引起回憶中的另一段往事觸發，這些事件可能會導致主角在心態上的轉變；
+4. 永遠不要用身體任何一部份做主語，例如嚴禁使用「指尖」、「額頭」、「手腕」，因為沒有人會觀察自己的，這樣刻劃非常不自然。以下這段是反面例子:「那枚佈滿霉斑的麻布袋靜臥在抽屜最深處，像一個被時光遺棄的秘密。暗褐色的斑點如無聲擴散的輿圖，吞噬著麻布原本粗礪的紋理，也吞噬著袋口歪斜的字跡——「向日葵種子」。手指拂過，細碎的黴粉簌簌剝落，揚起塵封歲月嗆人的氣息。三年前的陽光，卻忽而燙灼了我的掌心。」；
+5. 文章的角色在說對白時，嚴禁使用說教式的對白，例如「每一顆種子都藏著一個故事，我們要好好聆聽」，這些對白沒有情節支撐，讀者根本不知道角色說出這句對白的前因後果、來龍去脈，文中若反覆生成這些句子，讀者會很容易察覺是AI寫的。所有對白都要貼近生活。重要！嚴標使用類似對白！
+6. 全篇文章不能只圍繞一件事情去敘述，會顯得重複而乏味，例如文題為《種子》，不能全篇都圍繞著表面的「種植」過程去敘事，例如與爺爺一起將種子埋在泥土中，要取題目的象徵意義，明暗相生，互相扣連。表面上，有些情節與「種子」沒有直接連繫，但種子卻象徵著希望、未知，該些事情可以跟希望和未知這些主題有所連繫。
+7. 文章的人物要有自己的經歷和回憶，重要！文章應側重在人與人之間的交流及主角內心的心理刻劃，亦即情節的敘寫，不要用物件細節去取代情節。「轉」的部份，情節必須與上述任何部份都不一樣，「轉」的事件與「承」的事件不一樣，但又與主題緊緊扣連，這樣才能打開整篇文章的格局。
+8. 取材行文必須避免過於哲學化及抽象化，必須是具有文學性而又有煙火氣的材料及文句。
+
+
+[最終指令] 請直接輸出1300字內的高質量DSE敘事抒情文，不要添加任何解釋、標題或思考過程，不要超出字數。
+
+`;
+
+const ANALYSIS_PROMPT = `你是一位專業的中文文學評論家，請對以下DSE作文進行簡潔的文學技巧分析。
+
+必須用100至150字給予精煉的總評，不需要為每個部分提供評論，要適時運用例子和比喻來闡釋要點。評論需要：
+1. 貼近日常生活的語言，避免過於抽象和哲學的字眼
+2. 一語中的，準確點出技巧要點
+3. 運用生活化的比喻說明文學效果
+4. 為每個技巧提供文中的具體例子
+
+請按以下格式分析：
+
+**結構分析**
+分析文章的起承轉合結構，指出每個部分的作用，如同房屋的地基、承重牆、轉角和屋頂，各有其功能。
+
+**文學手法賞析**
+列出文章運用的具體技巧，就像廚師調味一般，每種手法都為文章增添不同的味道和質感。
+
+**語言特色**
+分析文章的語言風格，舉例說明優美句子，如同品茶般細細品味其中的韻味。
+
+**立意深度**
+評價文章的主題思想，分析其社會意義，看作者如何以小見大，從個人經歷折射出人生智慧。
+
+請用繁體中文回應，每部分控制在100-150字內。
+
+待分析文章：
+`;
+
+let isGenerating = false;
+
+document.getElementById('generateBtn').addEventListener('click', async function() {
+const topic = document.getElementById('essayTopic').value.trim();
+
+if (!topic) {
+alert('請輸入作文題目');
+return;
+}
+
+if (isGenerating) {
+return;
+}
+
+await generateEssay(topic);
+});
+
+// Allow Enter key to trigger generation
+document.getElementById('essayTopic').addEventListener('keypress', function(e) {
+if (e.key === 'Enter' && !e.shiftKey) {
+e.preventDefault();
+document.getElementById('generateBtn').click();
+}
+});
+
+async function generateEssay(topic) {
+const generateBtn = document.getElementById('generateBtn');
+const btnText = document.getElementById('btnText');
+const essayOutput = document.getElementById('essayOutput');
+const analysisOutput = document.getElementById('analysisOutput');
+const charCount = document.getElementById('charCount');
+
+isGenerating = true;
+generateBtn.disabled = true;
+btnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>正在生成<span class="loading-dots"></span>';
+
+essayOutput.innerHTML = `
+<div class="text-center text-gray-500 pt-20">
+<i class="fas fa-hourglass-half text-4xl mb-4 animate-spin"></i>
+<p>AI正在創作中，請稍候...</p>
+<div class="mt-4 text-sm">
+正在運用DSE評分標準生成高質量作文
+</div>
+</div>
+`;
+
+analysisOutput.innerHTML = `
+<div class="text-center text-gray-400 pt-10">
+<i class="fas fa-hourglass-half text-2xl mb-2 animate-spin"></i>
+<p class="text-sm">準備分析中...</p>
+</div>
+`;
+
+try {
+// Generate essay
+const essayResponse = await fetch(API_URL, {
+method: 'POST',
+headers: {
+'Authorization': `Bearer ${API_KEY}`,
+'Content-Type': 'application/json',
+},
+body: JSON.stringify({
+model: MODEL,
+messages: [
+{
+role: "system",
+content: SYSTEM_PROMPT
+},
+{
+role: "user",
+content: `請根據題目「${topic}」生成一篇DSE敘事抒情文。`
+}
+],
+max_tokens: 64000,
+temperature: 0.8,
+top_p: 0.9
+})
+});
+
+if (!essayResponse.ok) {
+throw new Error(`API 請求失敗: ${essayResponse.status}`);
+}
+
+const essayData = await essayResponse.json();
+let essay = essayData.choices[0].message.content.trim();
+
+// Remove any thinking process tags or content
+essay = essay.replace(/<think>[\s\S]*?<\/think>/g, '');
+essay = essay.replace(/\[思考過程\][\s\S]*?\[\/思考過程\]/g, '');
+essay = essay.replace(/思考：[\s\S]*?(?=\n\n|\n[^\n]|$)/g, '');
+
+// Display the essay
+essayOutput.innerHTML = `<div class="fade-in print-optimize">${essay.replace(/\n/g, '<br><br>')}</div>`;
+
+// Update character count
+const charLength = essay.replace(/\s/g, '').length;
+charCount.textContent = charLength;
+
+// Generate literary analysis
+analysisOutput.innerHTML = `
+<div class="text-center text-gray-400 pt-10">
+<i class="fas fa-hourglass-half text-2xl mb-2 animate-spin"></i>
+<p class="text-sm">正在生成文學分析...</p>
+</div>
+`;
+
+const analysisResponse = await fetch(API_URL, {
+method: 'POST',
+headers: {
+'Authorization': `Bearer ${API_KEY}`,
+'Content-Type': 'application/json',
+},
+body: JSON.stringify({
+model: MODEL,
+messages: [
+{
+role: "system",
+content: ANALYSIS_PROMPT + essay
+}
+],
+max_tokens: 32000,
+temperature: 0.7,
+top_p: 0.9
+})
+});
+
+if (analysisResponse.ok) {
+const analysisData = await analysisResponse.json();
+let analysis = analysisData.choices[0].message.content.trim();
+
+// Remove thinking process from analysis too
+analysis = analysis.replace(/<think>[\s\S]*?<\/think>/g, '');
+analysis = analysis.replace(/\[思考過程\][\s\S]*?\[\/思考過程\]/g, '');
+
+// Format analysis with better styling for the new 100-150 word format
+analysis = analysis.replace(/\*\*(.*?)\*\*/g, '<div class="analysis-title">$1</div>');
+analysis = analysis.replace(/\n\n/g, '</div><div class="analysis-box"><div class="analysis-content">');
+analysis = `<div class="analysis-box"><div class="analysis-content">${analysis}</div></div>`;
+
+analysisOutput.innerHTML = `<div class="fade-in">${analysis}</div>`;
+} else {
+analysisOutput.innerHTML = `
+<div class="text-center text-gray-400 pt-10">
+<i class="fas fa-info-circle text-2xl mb-2"></i>
+<p class="text-sm">分析生成失敗，但文章已成功生成</p>
+</div>
+`;
+}
+
+// Scroll to output
+essayOutput.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+} catch (error) {
+console.error('生成失敗:', error);
+essayOutput.innerHTML = `
+<div class="text-center text-red-500 pt-20">
+<i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+<p class="font-semibold">生成失敗</p>
+<div class="mt-4 text-sm text-gray-600">
+${error.message || '請檢查網絡連接後重試'}
+</div>
+<button onclick="location.reload()" class="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors">
+重新整理頁面
+</button>
+</div>
+`;
+
+analysisOutput.innerHTML = `
+<div class="text-center text-gray-400 pt-10">
+<i class="fas fa-times text-2xl mb-2"></i>
+<p class="text-sm">分析生成失敗</p>
+</div>
+`;
+} finally {
+isGenerating = false;
+generateBtn.disabled = false;
+btnText.innerHTML = '<i class="fas fa-magic mr-2"></i>生成作文';
+}
+}
+
+// Auto-resize textarea
+const textarea = document.getElementById('essayTopic');
+textarea.addEventListener('input', function() {
+this.style.height = 'auto';
+this.style.height = (this.scrollHeight) + 'px';
+});
+
+// Add some interactive effects
+document.addEventListener('DOMContentLoaded', function() {
+// Smooth scrolling for all internal links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+anchor.addEventListener('click', function (e) {
+e.preventDefault();
+const target = document.querySelector(this.getAttribute('href'));
+if (target) {
+target.scrollIntoView({
+behavior: 'smooth',
+block: 'start'
+});
+}
+});
+});
+
+// Add subtle animations to cards
+const observer = new IntersectionObserver((entries) => {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+entry.target.style.opacity = '1';
+entry.target.style.transform = 'translateY(0)';
+}
+});
+});
+
+document.querySelectorAll('.glass-card').forEach(card => {
+card.style.opacity = '0';
+card.style.transform = 'translateY(20px)';
+card.style.transition = 'all 0.6s ease';
+observer.observe(card);
+});
+});
+</script>
+</body>
+</html>
