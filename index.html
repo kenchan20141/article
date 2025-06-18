@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -12,7 +11,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap');
 
 * {
-font-family: 'Noto Sans TC', sans-serif;
+font-family: 'Noto Serif TC', 'cwTeXHei', 'cwTeXFangSong', 'cwTeXKai', 'cwTeXMing', 'PingFang TC', 'Microsoft JhengHei', serif;
 }
 
 .gradient-bg {
@@ -28,11 +27,6 @@ border: 1px solid rgba(255, 255, 255, 0.2);
 .essay-output {
 line-height: 1.8;
 letter-spacing: 0.02em;
-}
-
-.analysis-section {
-line-height: 1.6;
-font-size: 0.9rem;
 }
 
 .loading-dots {
@@ -80,43 +74,19 @@ border-color: #4a5568;
 box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
 }
 
-.analysis-highlight {
+.structure-option {
+transition: all 0.3s ease;
+border: 2px solid #e2e8f0;
+}
+
+.structure-option.selected {
+border-color: #4a5568;
 background-color: #f7fafc;
-border-left: 4px solid #4a5568;
-padding: 12px;
-margin: 8px 0;
-border-radius: 4px;
 }
 
-.technique-badge {
-display: inline-block;
-background-color: #4a5568;
-color: white;
-padding: 2px 8px;
-border-radius: 12px;
-font-size: 0.75rem;
-margin: 2px;
-}
-
-.analysis-box {
-background-color: #f8f9fa;
-border: 1px solid #e9ecef;
-border-radius: 8px;
-padding: 16px;
-margin-bottom: 16px;
-}
-
-.analysis-title {
-font-weight: 600;
-color: #4a5568;
-margin-bottom: 8px;
-font-size: 0.95rem;
-}
-
-.analysis-content {
-color: #555;
-line-height: 1.6;
-font-size: 0.9rem;
+.structure-option:hover {
+border-color: #cbd5e0;
+background-color: #f7fafc;
 }
 
 @media print {
@@ -127,14 +97,13 @@ body { margin: 0; padding: 20px; }
 </style>
 </head>
 <body class="min-h-screen bg-gray-50">
-<div class="container mx-auto px-4 py-8 max-w-7xl">
+<div class="container mx-auto px-4 py-8 max-w-6xl">
 <!-- Header -->
 <div class="text-center mb-8">
 <h1 class="text-4xl font-bold text-gray-800 mb-2">
 <i class="fas fa-feather-alt mr-3 text-gray-600"></i>
 DSE 中文作文生成器
 </h1>
-<p class="text-gray-600 text-lg">運用人工智能技術，生成高質量的DSE敘事抒情文章</p>
 </div>
 
 <!-- Input Section -->
@@ -156,6 +125,36 @@ placeholder="例如：那一次，我真的很感動"
 ></textarea>
 </div>
 
+<!-- Structure Selection -->
+<div class="mb-6">
+<h3 class="text-lg font-medium text-gray-700 mb-3">
+<i class="fas fa-sitemap mr-2 text-gray-600"></i>
+選擇文章結構：
+</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="structure-option p-4 rounded-lg cursor-pointer" data-structure="起承轉合">
+<div class="flex items-center mb-2">
+<input type="radio" id="structure1" name="structure" value="起承轉合" class="mr-3" checked>
+<label for="structure1" class="font-semibold text-gray-800 cursor-pointer">起承轉合</label>
+</div>
+<p class="text-sm text-gray-600">傳統四段式結構，適合敘事抒情文</p>
+<div class="mt-2 text-xs text-gray-500">
+起：開篇交代背景 → 承：事件發展 → 轉：轉折點 → 合：結局與感悟
+</div>
+</div>
+<div class="structure-option p-4 rounded-lg cursor-pointer" data-structure="三線散敘">
+<div class="flex items-center mb-2">
+<input type="radio" id="structure2" name="structure" value="三線散敘" class="mr-3">
+<label for="structure2" class="font-semibold text-gray-800 cursor-pointer">三線散敘</label>
+</div>
+<p class="text-sm text-gray-600">三條線索交織，圍繞主題多角度敘寫</p>
+<div class="mt-2 text-xs text-gray-500">
+三個不同事件或場景，相互呼應，共同深化主題
+</div>
+</div>
+</div>
+</div>
+
 <button 
 id="generateBtn" 
 class="btn-primary w-full py-3 px-6 text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
@@ -166,14 +165,12 @@ class="btn-primary w-full py-3 px-6 text-white font-semibold rounded-lg disabled
 
 <div class="mt-4 text-sm text-gray-600">
 <i class="fas fa-info-circle mr-2"></i>
-系統將根據DSE評分標準生成約1200-1300字的敘事抒情文，並提供精簡文學技巧分析
+系統將根據DSE評分標準生成約1100-1300字的敘事抒情文
 </div>
 </div>
 
-<!-- Main Content Area -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 <!-- Essay Output Section -->
-<div class="lg:col-span-2 glass-card rounded-xl shadow-lg p-6">
+<div class="glass-card rounded-xl shadow-lg p-6 mb-8">
 <div class="flex justify-between items-center mb-4">
 <h2 class="text-2xl font-semibold text-gray-800">
 <i class="fas fa-file-alt mr-2 text-gray-600"></i>
@@ -195,25 +192,6 @@ class="essay-output bg-white border border-gray-200 rounded-lg p-6 text-gray-700
 </div>
 </div>
 
-<!-- Literary Analysis Section -->
-<div class="glass-card rounded-xl shadow-lg p-6">
-<h2 class="text-xl font-semibold text-gray-800 mb-4">
-<i class="fas fa-lightbulb mr-2 text-gray-600"></i>
-文學技巧賞析
-</h2>
-
-<div 
-id="analysisOutput" 
-class="analysis-section text-gray-700"
->
-<div class="text-center text-gray-400 pt-20">
-<i class="fas fa-search text-3xl mb-4"></i>
-<p class="text-sm">文章生成後將顯示簡潔的文學技巧分析</p>
-</div>
-</div>
-</div>
-</div>
-
 <!-- Features Section -->
 <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
 <div class="glass-card rounded-xl p-6 text-center">
@@ -221,7 +199,7 @@ class="analysis-section text-gray-700"
 <i class="fas fa-brain text-gray-600"></i>
 </div>
 <h3 class="font-semibold text-gray-800 mb-2">智能分析</h3>
-<p class="text-gray-600 text-sm">運用先進AI技術分析題目，生成符合DSE標準的文章結構</p>
+<p class="text-gray-600 text-sm">運用先進AI技術分析題目</p>
 </div>
 
 <div class="glass-card rounded-xl p-6 text-center">
@@ -229,21 +207,21 @@ class="analysis-section text-gray-700"
 <i class="fas fa-palette text-gray-600"></i>
 </div>
 <h3 class="font-semibold text-gray-800 mb-2">文學技巧</h3>
-<p class="text-gray-600 text-sm">融合多種文學手法，包括示現敘事、情景交融等技巧</p>
+<p class="text-gray-600 text-sm">融合多種文學手法</p>
 </div>
 
 <div class="glass-card rounded-xl p-6 text-center">
 <div class="text-3xl mb-4">
 <i class="fas fa-star text-gray-600"></i>
 </div>
-<h3 class="font-semibold text-gray-800 mb-2">簡潔賞析</h3>
-<p class="text-gray-600 text-sm">提供精練的文學技巧分析，幫助快速理解優秀作文的寫作手法</p>
+<h3 class="font-semibold text-gray-800 mb-2">高質量輸出</h3>
+<p class="text-gray-600 text-sm">生成符合DSE評分標準的優質作文</p>
 </div>
 </div>
 
 <!-- Footer -->
 <div class="mt-12 text-center text-gray-500 text-sm">
-<p>© 2024 DSE 中文作文生成器 - 基於人工智能技術驅動</p>
+<p>© 2025 陳冠健</p>
 </div>
 </div>
 
@@ -252,12 +230,14 @@ const API_URL = "https://chatapi.akash.network/api/v1/chat/completions";
 const MODEL = "DeepSeek-R1-0528";
 const API_KEY = "sk-7Zc--KPcXgJTpuSHXsVDWQ";
 
-const SYSTEM_PROMPT = `你是一個專業的DSE中文作文作家。請根據以下完整指令生成高質量的敘事抒情文：
+const BASE_SYSTEM_PROMPT = `你是一個專業的DSE中文作文作家。請根據以下完整指令生成高質量的敘事抒情文：
 
 [目標] 請根據以下所有詳細要求，生成一篇約1300個中文字符的DSE敘事抒情文。文章須緊扣給定題目，內容深刻、表達細膩，並嚴格遵守所有敘事和語言規範。
 
-[文章類型] 敘事抒情文。
+[文章類型] 敘事抒情文。`;
 
+const STRUCTURE_PROMPTS = {
+  "起承轉合": `
 [核心結構：起承轉合及扣題內容] 你的文章必須清晰地呈現「起、承、轉、合」四大結構部分，並確保每個部分都與文章主題緊密扣聯。
 1. 起 (起因):
    - 開篇交代故事背景或事件起因。
@@ -281,8 +261,34 @@ const SYSTEM_PROMPT = `你是一個專業的DSE中文作文作家。請根據以
 
 [過渡]
 • 確保文章各部分（起、承、轉、合）之間過渡流暢，避免生硬拼湊。
-• 可使用獨立的過渡段落，或在段落末尾/開頭加入過渡性文字。
+• 可使用獨立的過渡段落，或在段落末尾/開頭加入過渡性文字。`,
 
+  "三線散敘": `
+[核心結構：三線散敘] 你的文章必須採用三線散敘結構，圍繞主題用不同事件去敘寫，各線索之間相互呼應，共同深化主題。
+
+1. 第一線：
+   - 圍繞主題選擇一個具體的生活事件或場景
+   - 詳細描寫該事件的經過和感受
+   - 體現主題的某個側面或層次
+
+2. 第二線：
+   - 選擇另一個與主題相關但不同角度的事件
+   - 可以是不同時間、不同地點或不同人物的經歷
+   - 與第一線形成對比或補充，豐富主題內涵
+
+3. 第三線：
+   - 第三個相關事件，進一步拓展主題的深度和廣度
+   - 可以是更深層的思考或更廣闊的視野
+   - 三線匯聚，在結尾處昇華主題
+
+[線索交織與過渡]
+• 三條線索不是簡單的並列，而要巧妙交織
+• 可以通過時間跳躍、空間轉換、聯想等方式連接各線
+• 確保過渡自然流暢，避免生硬切換
+• 各線索之間要有內在的邏輯聯繫和情感呼應`
+};
+
+const COMMON_PROMPT = `
 [主題及立意]
 • 立意公式: (表面A + 實際非A) + 合理解釋 = 好的立意。
 • 立意應能「以小見大」，帶給讀者思考與共鳴，並具有社會性。避免落俗套的陳腔濫調。
@@ -345,8 +351,12 @@ const SYSTEM_PROMPT = `你是一個專業的DSE中文作文作家。請根據以
 • 比喻法: 以別出心裁的比喻作結，圍繞該物象發揮，帶出主題。
 
 [語言要求]
-• 請使用繁體中文進行生成。
+• 請使用繁體中文進行生成，絕不可以運用粵語。
 • 語言優美、文筆流暢，符合敘事抒情文的風格。
+
+[題材]
+• 豐富多變，不要寫比賽、溫習、工作和考試，要能夠引起別人的情感共鳴。
+• 主角不可以是學生，一定要是成年人
 
 [作文範例參考] 請參考以下三篇優秀作文的風格和技巧：
 
@@ -419,52 +429,60 @@ const SYSTEM_PROMPT = `你是一個專業的DSE中文作文作家。請根據以
 等著等著，她便像個孩子似的，哭嚷著要女兒回來，我溫柔地摩娑著她的髮絲、她的臉龐、她的下巴、她的背、她的手，又在她耳畔低語：「別怕，我與你一起等女兒回來，好不好？」她冷靜下來，默默地頷著首。
 煙花，終於結了果，一如等待，終於在落空中結了果。
 
-[最終指令] 請你作為一個訓練有素的DSE作文AI，模仿以上三篇範例的風格和技巧，綜合運用上述所有指令與要求，生成一篇符合DSE考核標準的高質量敘事抒情文。請仔細核對字數，確保文章長度在1300字內。請直接輸出文章內容，不要添加任何解釋或標題。
-
+[最終指令] 請你作為一個訓練有素的DSE作文AI，模仿以上三篇範例的風格和技巧，綜合運用上述所有指令與要求，生成一篇符合DSE考核標準的高質量敘事抒情文。請仔細核對字數，確保文章長度在1100字至1300字內。請直接輸出文章內容，不要添加任何解釋或標題。
 
 [重要提醒]
 1. 永遠不要展示思考過程，生成結果只應有文章；
 2. 不要過份刻劃畫面中與主題不相關的細節，每個結構段都要聚焦到與主題相關的重點，不要生成細節豐富但情節單薄的文章；
-3. 所有「轉」都必須有兩點支撐，例如由現實中的某一件事牽引起回憶中的另一段往事觸發，這些事件可能會導致主角在心態上的轉變；
+3. 所有「轉」都必須有兩點支撐，例如由現實中的某一件事(200字左右)牽引起回憶中的另一段往事(200字左右)觸發，這些事件可能會導致主角在心態上的轉變；
 4. 永遠不要用身體任何一部份做主語，例如嚴禁使用「指尖」、「額頭」、「手腕」，因為沒有人會觀察自己的，這樣刻劃非常不自然。以下這段是反面例子:「那枚佈滿霉斑的麻布袋靜臥在抽屜最深處，像一個被時光遺棄的秘密。暗褐色的斑點如無聲擴散的輿圖，吞噬著麻布原本粗礪的紋理，也吞噬著袋口歪斜的字跡——「向日葵種子」。手指拂過，細碎的黴粉簌簌剝落，揚起塵封歲月嗆人的氣息。三年前的陽光，卻忽而燙灼了我的掌心。」；
 5. 文章的角色在說對白時，嚴禁使用說教式的對白，例如「每一顆種子都藏著一個故事，我們要好好聆聽」，這些對白沒有情節支撐，讀者根本不知道角色說出這句對白的前因後果、來龍去脈，文中若反覆生成這些句子，讀者會很容易察覺是AI寫的。所有對白都要貼近生活。重要！嚴標使用類似對白！
 6. 全篇文章不能只圍繞一件事情去敘述，會顯得重複而乏味，例如文題為《種子》，不能全篇都圍繞著表面的「種植」過程去敘事，例如與爺爺一起將種子埋在泥土中，要取題目的象徵意義，明暗相生，互相扣連。表面上，有些情節與「種子」沒有直接連繫，但種子卻象徵著希望、未知，該些事情可以跟希望和未知這些主題有所連繫。
 7. 文章的人物要有自己的經歷和回憶，重要！文章應側重在人與人之間的交流及主角內心的心理刻劃，亦即情節的敘寫，不要用物件細節去取代情節。「轉」的部份，情節必須與上述任何部份都不一樣，「轉」的事件與「承」的事件不一樣，但又與主題緊緊扣連，這樣才能打開整篇文章的格局。
 8. 取材行文必須避免過於哲學化及抽象化，必須是具有文學性而又有煙火氣的材料及文句。
+9. 嚴禁連用不同小物件做主語的句子，小物件等主語不宜連續變換，第一段要減少運用小物件做主語。
+10. 題材要豐富多變，絕不可以寫溫習、工作、比賽等主題。
+11. 全文的事件時間點應有三次左右的變換，即可由現實到回憶，亦可回憶回到現實，這樣能增加情節的變化。
 
-
-[最終指令] 請直接輸出1300字內的高質量DSE敘事抒情文，不要添加任何解釋、標題或思考過程，不要超出字數。
-
-`;
-
-const ANALYSIS_PROMPT = `你是一位專業的中文文學評論家，請對以下DSE作文進行簡潔的文學技巧分析。
-
-必須用100至150字給予精煉的總評，不需要為每個部分提供評論，要適時運用例子和比喻來闡釋要點。評論需要：
-1. 貼近日常生活的語言，避免過於抽象和哲學的字眼
-2. 一語中的，準確點出技巧要點
-3. 運用生活化的比喻說明文學效果
-4. 為每個技巧提供文中的具體例子
-
-請按以下格式分析：
-
-**結構分析**
-分析文章的起承轉合結構，指出每個部分的作用，如同房屋的地基、承重牆、轉角和屋頂，各有其功能。
-
-**文學手法賞析**
-列出文章運用的具體技巧，就像廚師調味一般，每種手法都為文章增添不同的味道和質感。
-
-**語言特色**
-分析文章的語言風格，舉例說明優美句子，如同品茶般細細品味其中的韻味。
-
-**立意深度**
-評價文章的主題思想，分析其社會意義，看作者如何以小見大，從個人經歷折射出人生智慧。
-
-請用繁體中文回應，每部分控制在100-150字內。
-
-待分析文章：
+[最終指令] 請直接輸出1100至1300字內的高質量DSE敘事抒情文，不要添加任何解釋、標題或思考過程，不要超出字數。
 `;
 
 let isGenerating = false;
+
+// Handle structure selection
+document.querySelectorAll('.structure-option').forEach(option => {
+    option.addEventListener('click', function() {
+        const structureName = this.dataset.structure;
+        const radioButton = this.querySelector('input[type="radio"]');
+        
+        // Update radio button
+        document.querySelectorAll('input[name="structure"]').forEach(radio => {
+            radio.checked = false;
+        });
+        radioButton.checked = true;
+        
+        // Update visual selection
+        document.querySelectorAll('.structure-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        this.classList.add('selected');
+    });
+});
+
+// Handle radio button changes
+document.querySelectorAll('input[name="structure"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        if (this.checked) {
+            document.querySelectorAll('.structure-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            this.closest('.structure-option').classList.add('selected');
+        }
+    });
+});
+
+// Set initial selection
+document.querySelector('.structure-option[data-structure="起承轉合"]').classList.add('selected');
 
 document.getElementById('generateBtn').addEventListener('click', async function() {
 const topic = document.getElementById('essayTopic').value.trim();
@@ -493,8 +511,10 @@ async function generateEssay(topic) {
 const generateBtn = document.getElementById('generateBtn');
 const btnText = document.getElementById('btnText');
 const essayOutput = document.getElementById('essayOutput');
-const analysisOutput = document.getElementById('analysisOutput');
 const charCount = document.getElementById('charCount');
+
+// Get selected structure
+const selectedStructure = document.querySelector('input[name="structure"]:checked').value;
 
 isGenerating = true;
 generateBtn.disabled = true;
@@ -505,19 +525,15 @@ essayOutput.innerHTML = `
 <i class="fas fa-hourglass-half text-4xl mb-4 animate-spin"></i>
 <p>AI正在創作中，請稍候...</p>
 <div class="mt-4 text-sm">
-正在運用DSE評分標準生成高質量作文
+正在運用${selectedStructure}結構生成高質量作文
 </div>
-</div>
-`;
-
-analysisOutput.innerHTML = `
-<div class="text-center text-gray-400 pt-10">
-<i class="fas fa-hourglass-half text-2xl mb-2 animate-spin"></i>
-<p class="text-sm">準備分析中...</p>
 </div>
 `;
 
 try {
+// Build system prompt based on selected structure
+const systemPrompt = BASE_SYSTEM_PROMPT + STRUCTURE_PROMPTS[selectedStructure] + COMMON_PROMPT;
+
 // Generate essay
 const essayResponse = await fetch(API_URL, {
 method: 'POST',
@@ -530,11 +546,11 @@ model: MODEL,
 messages: [
 {
 role: "system",
-content: SYSTEM_PROMPT
+content: systemPrompt
 },
 {
 role: "user",
-content: `請根據題目「${topic}」生成一篇DSE敘事抒情文。`
+content: `請根據題目「${topic}」使用${selectedStructure}結構生成一篇DSE敘事抒情文。`
 }
 ],
 max_tokens: 64000,
@@ -562,57 +578,6 @@ essayOutput.innerHTML = `<div class="fade-in print-optimize">${essay.replace(/\n
 const charLength = essay.replace(/\s/g, '').length;
 charCount.textContent = charLength;
 
-// Generate literary analysis
-analysisOutput.innerHTML = `
-<div class="text-center text-gray-400 pt-10">
-<i class="fas fa-hourglass-half text-2xl mb-2 animate-spin"></i>
-<p class="text-sm">正在生成文學分析...</p>
-</div>
-`;
-
-const analysisResponse = await fetch(API_URL, {
-method: 'POST',
-headers: {
-'Authorization': `Bearer ${API_KEY}`,
-'Content-Type': 'application/json',
-},
-body: JSON.stringify({
-model: MODEL,
-messages: [
-{
-role: "system",
-content: ANALYSIS_PROMPT + essay
-}
-],
-max_tokens: 32000,
-temperature: 0.7,
-top_p: 0.9
-})
-});
-
-if (analysisResponse.ok) {
-const analysisData = await analysisResponse.json();
-let analysis = analysisData.choices[0].message.content.trim();
-
-// Remove thinking process from analysis too
-analysis = analysis.replace(/<think>[\s\S]*?<\/think>/g, '');
-analysis = analysis.replace(/\[思考過程\][\s\S]*?\[\/思考過程\]/g, '');
-
-// Format analysis with better styling for the new 100-150 word format
-analysis = analysis.replace(/\*\*(.*?)\*\*/g, '<div class="analysis-title">$1</div>');
-analysis = analysis.replace(/\n\n/g, '</div><div class="analysis-box"><div class="analysis-content">');
-analysis = `<div class="analysis-box"><div class="analysis-content">${analysis}</div></div>`;
-
-analysisOutput.innerHTML = `<div class="fade-in">${analysis}</div>`;
-} else {
-analysisOutput.innerHTML = `
-<div class="text-center text-gray-400 pt-10">
-<i class="fas fa-info-circle text-2xl mb-2"></i>
-<p class="text-sm">分析生成失敗，但文章已成功生成</p>
-</div>
-`;
-}
-
 // Scroll to output
 essayOutput.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -628,13 +593,6 @@ ${error.message || '請檢查網絡連接後重試'}
 <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors">
 重新整理頁面
 </button>
-</div>
-`;
-
-analysisOutput.innerHTML = `
-<div class="text-center text-gray-400 pt-10">
-<i class="fas fa-times text-2xl mb-2"></i>
-<p class="text-sm">分析生成失敗</p>
 </div>
 `;
 } finally {
