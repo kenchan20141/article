@@ -89,6 +89,25 @@ background-color: #e2e8f0;
 border-color: #4a5568;
 }
 
+.word-count-control button {
+    background-color: #f1f5f9;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4a5568;
+    transition: all 0.2s ease;
+}
+.word-count-control button:hover {
+    background-color: #e2e8f0;
+    transform: scale(1.05);
+}
+.word-count-control button:active {
+    background-color: #cbd5e1;
+}
+
 @media print {
 body { margin: 0; padding: 20px; }
 .no-print { display: none !important; }
@@ -124,6 +143,39 @@ class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:outl
 placeholder="例如：那一次，我真的很感動"
 ></textarea>
 </div>
+
+<!-- Word Count Setting -->
+<div class="mb-6">
+    <label class="block text-sm font-medium text-gray-700 mb-2">
+        字數設定：
+    </label>
+    <div class="word-count-control flex items-center justify-center space-x-6 bg-white border border-gray-300 rounded-lg p-3">
+        <button id="decreaseBtn" aria-label="減少字數">
+            <i class="fas fa-minus"></i>
+        </button>
+        <div class="text-center">
+            <span id="wordCountDisplay" class="text-lg font-bold text-gray-800">1300</span>
+            <span class="text-sm text-gray-600">字</span>
+        </div>
+        <button id="increaseBtn" aria-label="增加字數">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Creative Guidelines -->
+<div class="mb-6">
+<label for="creativeGuidelines" class="block text-sm font-medium text-gray-700 mb-2">
+創作指引 (可選填)：
+</label>
+<textarea 
+id="creativeGuidelines" 
+rows="4" 
+class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none resize-y"
+placeholder="請輸入創作的思路，例如題材和情節等"
+></textarea>
+</div>
+
 
 <!-- Structure Selection -->
 <div class="mb-6">
@@ -536,7 +588,7 @@ const THREELINE_SYSTEM_PROMPT = `你是一個專業的DSE中文作文作家。�
 離鄉的這夜，恰巧是元旦。是夜天陰，無雨。梁莊寂寥如一場夢，再沒有盛放的煙火。因為，煙花從此只在我的回憶裡燦爛地綻開、匆促地結果。
 
 第二篇：《根》
-火焰燃起了一瓣又一瓣的灰燼，它們即生即滅，像飄萍，是一種無根的存在。餘燼隨風零落，又再揚起，終落入了深邃的虛無裡。人們說，紙錢燒成灰燼，便會飛落到地獄，交到亡靈的手裡。
+火焰燃起了一瓣又一瓣的灰燼，它們即生即滅，像飄萍，是一種無根的存在。餘燼隨風零落，又再揚起，終落入了深邃的虛無裡。人們說，紙錢燒成灰燼，便會飛落到地獄，交到亡靈の手裡。
 父親，你收到了嗎？
 你，尋到你的根了嗎？
 我向着一枚貝殼問道。
@@ -581,7 +633,7 @@ const THREELINE_SYSTEM_PROMPT = `你是一個專業的DSE中文作文作家。�
 我的女兒回來了嗎？
 你瞇著惺忪的睡眼問我。
 還未，她還未回來，再等一下吧。
-其實，她永遠都不會回來了，因為她已永恆地滯留在時光的隧道裡。在那個地方，夢即現實，回憶即現實，人永遠不會長大，更不會蒼老。因此之故，她永遠不會回來了。
+其實，她永遠都不會回來了， क्योंकि她已永恆地滯留在時光的隧道裡。在那個地方，夢即現實，回憶即現實，人永遠不會長大，更不會蒼老。因此之故，她永遠不會回來了。
 至於我等待的人，等待的一聲呼喊，也不會回來了。她已羈困在一段停滯的時光裡，沒有逃逸，亦沒有人想逃逸。因為，她已等待得支離破碎，疲憊不堪了。
 我們的等待，注定了落空。
 但八年的等待裡，我終究參悟了落空的意義。正如那棵似乎會勃發生長的綠豆苗，也許一星期後便會似一場曉夢般枯萎，但孩子學會了生命的價值，學會了甚麼是失落，學會了憧憬在字典外的含義；又正如那個滿佈瘡痍的女人，在漫無邊際的等待裡，或許終於明白了有些等待並不值得，明白了有些等待並不值得，明白了有些等待只是一廂情願，於是鼓起離婚的勇氣。在等待裡，所有人都會找到新的意義。也許，等待只是一場燦爛奪目的煙花，只承諾開花，卻從不承諾結果。但在等待裡，我們都重新認識了自己和他人，甚或是人生。一如八年的等待，使我終於能體會媽媽的體會，孤寂、失望、無奈、感慨、悱惻，我都一一感受到了。她沒有遺下一句說話，便將我遺留在時光的彼岸，然而她內心最隱密的說話，我已諦聽到了。因為，我也成為了一個等待的人。等待的過程裡，我還學會了堅強、勇氣和耐心。從前，我何曾耐心地回應過她一句呢？
@@ -667,6 +719,10 @@ const btnText = document.getElementById('btnText');
 const essayOutput = document.getElementById('essayOutput');
 const charCount = document.getElementById('charCount');
 
+// Get new input values
+const wordCountLimit = document.getElementById('wordCountDisplay').textContent;
+const creativeGuidelines = document.getElementById('creativeGuidelines').value.trim();
+
 // Get selected structure
 const selectedStructure = document.querySelector('input[name="structure"]:checked').value;
 const systemPrompt = selectedStructure === 'classic' ? CLASSIC_SYSTEM_PROMPT : THREELINE_SYSTEM_PROMPT;
@@ -686,6 +742,20 @@ essayOutput.innerHTML = `
 `;
 
 try {
+// Construct the user prompt with additional instructions
+let userContent = `請根據題目「${topic}」生成一篇DSE敘事抒情文。`;
+let additionalInstructions = '';
+
+if (wordCountLimit) {
+    additionalInstructions += `\n- **重要指令**：最終生成的文章字數**必須嚴格控制在 ${wordCountLimit} 字以內**。此為最高優先級指令，請務必遵守，並覆蓋系統提示中的任何預設字數要求。`;
+}
+if (creativeGuidelines) {
+    additionalInstructions += `\n- **創作指引**：${creativeGuidelines}`;
+}
+if (additionalInstructions) {
+    userContent += `\n\n[額外要求與指引]\n${additionalInstructions}`;
+}
+
 // Generate essay
 const essayResponse = await fetch(API_URL, {
 method: 'POST',
@@ -702,7 +772,7 @@ content: systemPrompt
 },
 {
 role: "user",
-content: `請根據題目「${topic}」生成一篇DSE敘事抒情文。`
+content: userContent
 }
 ],
 max_tokens: 64000,
@@ -763,36 +833,61 @@ this.style.height = (this.scrollHeight) + 'px';
 
 // Add some interactive effects
 document.addEventListener('DOMContentLoaded', function() {
-// Smooth scrolling for all internal links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-anchor.addEventListener('click', function (e) {
-e.preventDefault();
-const target = document.querySelector(this.getAttribute('href'));
-if (target) {
-target.scrollIntoView({
-behavior: 'smooth',
-block: 'start'
-});
-}
-});
-});
+    // Word Count Control Logic
+    const decreaseBtn = document.getElementById('decreaseBtn');
+    const increaseBtn = document.getElementById('increaseBtn');
+    const wordCountDisplay = document.getElementById('wordCountDisplay');
+    let currentWordCount = 1300;
 
-// Add subtle animations to cards
-const observer = new IntersectionObserver((entries) => {
-entries.forEach(entry => {
-if (entry.isIntersecting) {
-entry.target.style.opacity = '1';
-entry.target.style.transform = 'translateY(0)';
-}
-});
-});
+    const updateWordCountDisplay = () => {
+        wordCountDisplay.textContent = currentWordCount;
+    };
 
-document.querySelectorAll('.glass-card').forEach(card => {
-card.style.opacity = '0';
-card.style.transform = 'translateY(20px)';
-card.style.transition = 'all 0.6s ease';
-observer.observe(card);
-});
+    decreaseBtn.addEventListener('click', () => {
+        if (currentWordCount > 100) { // Set a minimum limit
+            currentWordCount -= 100;
+            updateWordCountDisplay();
+        }
+    });
+
+    increaseBtn.addEventListener('click', () => {
+        currentWordCount += 100;
+        updateWordCountDisplay();
+    });
+
+    // Smooth scrolling for all internal links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Add subtle animations to cards
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+
+    document.querySelectorAll('.glass-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.6s ease';
+        observer.observe(card);
+    });
+
+    // Initialize display
+    updateWordCountDisplay();
 });
 </script>
 </body>
