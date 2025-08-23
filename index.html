@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -8,16 +9,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #F3F0EB;
-            --text-color: #3D3A3A;
-            --primary-color: #6B6862;
-            --secondary-color: #A9A49A;
-            --border-color: #DCD9D4;
-            --accent-color: #8A8375;
-            --font-serif: 'Noto Serif JP', serif;
-            --font-sans: 'Zen Kaku Gothic New', sans-serif;
-        }
+       :root {
+  --bg-color: #F3F0EB;
+  --text-color: #333333;
+  --primary-color: #5D5A56; 
+  --secondary-color: #77726D;
+  --border-color: #C5BEB6; 
+  /* 使用靜謐藍作為新的強調色 */
+  --accent-color: #6A7E99; 
+  --font-serif: 'Noto Serif JP', serif;
+  --font-sans: 'Zen Kaku Gothic New', sans-serif;
+}
 
         * {
             box-sizing: border-box;
@@ -105,11 +107,12 @@
         }
 
         .control-group input[type="text"]:focus,
-        .control-group textarea:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 5px rgba(138, 131, 117, 0.2);
-        }
+.control-group textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  /* 更新 box-shadow 以匹配新的藍色調 */
+  box-shadow: 0 0 5px rgba(106, 126, 153, 0.25);
+}
 
         .control-group textarea {
             min-height: 120px;
@@ -1094,7 +1097,13 @@
 
             generateBtn.addEventListener('click', async () => {
                 const topic = topicInput.value.trim();
-                const guidelines = guidelinesInput.value.trim();
+               const userGuidelines = guidelinesInput.value.trim();
+const hiddenInstruction = "句組要長一點，要詳寫現實和回憶片段。";
+
+// 如果使用者有輸入，則將隱藏指令附加在後面；如果沒有，則單獨使用隱藏指令。
+const finalGuidelines = userGuidelines 
+    ? `${userGuidelines}\n${hiddenInstruction}` 
+    : hiddenInstruction;
                 const selectedModel = document.querySelector('input[name="model"]:checked').value;
                 const selectedStructure = document.querySelector('input[name="structure"]:checked').value;
 
@@ -1132,7 +1141,7 @@ ${writingInstructions}
 
 1.  **初稿寫作**：根據以下用家要求及你收到的【寫作框架與要求】，創作一篇約 ${wordCount} 字的初稿。
     -   **題目**: 《${topic}》
-    -   **創作指引**: ${guidelines || '沒有提供額外指引'}
+    - **創作指引**: ${finalGuidelines} // <--- 在這裡使用新的合併後指引
 
 2.  **內部自我評核 (絕不外洩)**：寫作完成後，你必須立刻化身為一位極其嚴苛的 DSE 語文科評卷員。使用你內置的評分系統（包含5**範文參考和詳細評分準則），對你的初稿進行全面、客觀、嚴謹的評分。你必須在腦中完成一個完整的評分工作紙，計算出「內容」、「表達」、「結構」以及所有細項分數。
 
