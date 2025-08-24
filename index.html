@@ -1098,7 +1098,9 @@
             generateBtn.addEventListener('click', async () => {
                 const topic = topicInput.value.trim();
                const userGuidelines = guidelinesInput.value.trim();
-const hiddenInstruction = "句組要長一點，要詳寫現實和回憶片段。";
+const hiddenInstruction = "句組要長一點，要詳寫現實和回憶片段。全文都要有明確的扣題小段，全文都要有!topic這個題眼。";
+
+                hiddenInstruction = hiddenInstruction.replace(/!topic/g, topic);
 
 // 如果使用者有輸入，則將隱藏指令附加在後面；如果沒有，則單獨使用隱藏指令。
 const finalGuidelines = userGuidelines 
